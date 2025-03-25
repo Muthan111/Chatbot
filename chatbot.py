@@ -19,5 +19,10 @@ async def root(request: Request):
 
 @app.post("/")
 async def handle_input(request: Request, user_input: str = Form(...)):
+    if user_input == "":
+        return templates.TemplateResponse("index.html", {"request": request, "response_data": "Please enter something"})
     response_data = model.generate_content(user_input)
+    
+    if response_data.status_code != 200:
+        return templates.TemplateResponse("index.html", {"request": request, "response_data": "Check API key."})
     return templates.TemplateResponse("index.html", {"request": request, "response_data": response_data.text})
