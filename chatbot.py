@@ -1,28 +1,46 @@
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, Depends
 from fastapi.templating import Jinja2Templates
-import os
+from starlette.middleware.sessions import SessionMiddleware
+from starlette.responses import JSONResponse
 import google.generativeai as genai
+import asyncio
 
-os.environ['GOOGLE_API_KEY'] = "AIzaSyAS6Nk1imMf8AydvMbpfUrTCgBF8o77Z1w"
-genai.configure(api_key = os.environ['GOOGLE_API_KEY'])
-
-model = genai.GenerativeModel('gemini-2.0-pro-exp')
-#model = genai.GenerativeModel('gemini-1.5-pro')
-
+# API Key Configuration
+genai.configure(api_key="AIzaSyAS6Nk1imMf8AydvMbpfUrTCgBF8o77Z1w")
+model = genai.GenerativeModel("gemini-2.0-pro-exp")
 
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")  # Specify your template directory
+
+# Add session middleware
+app.add_middleware(SessionMiddleware, secret_key="super_secret_key", session_cookie="chat_session")
+
+# Template directory
+templates = Jinja2Templates(directory="templates")
 
 @app.get("/chat")
 async def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})  # Assuming your template is named "index.html"
+    """Load chat history and return the chat page."""
+    chat_history = request.session.get("chat_history", [])
+    return templates.TemplateResponse("index.html", {"request": request, "chat_history": chat_history})
 
-@app.post("/")
+@app.post("/chat")
 async def handle_input(request: Request, user_input: str = Form(...)):
-    if user_input == "":
-        return templates.TemplateResponse("index.html", {"request": request, "response_data": "Please enter something"})
-    response_data = model.generate_content(user_input)
-    
-    if response_data.status_code != 200:
-        return templates.TemplateResponse("index.html", {"request": request, "response_data": "Check API key."})
-    return templates.TemplateResponse("index.html", {"request": request, "response_data": response_data.text})
+    """Handles user input and returns chatbot response asynchronously."""
+    try:
+        # Run model generation in a separate thread to avoid blocking
+        response = await asyncio.to_thread(model.generate_content, user_input)
+        response_text = response.text if response and hasattr(response, "text") else "I'm sorry, I couldn't process that."
+
+        # Retrieve chat history from session
+        chat_history = request.session.get("chat_history", [])
+        chat_history.append({"role": "user", "message": user_input})
+        chat_history.append({"role": "bot", "message": response_text})
+
+        # Store updated chat history (limit history to 10 messages to avoid slowdowns)
+        request.session["chat_history"] = chat_history[-10:]
+
+        return JSONResponse(content={"response": response_text, "chat_history": chat_history})
+
+    except Exception as e:
+        print(f"Error: {e}")  # Log the issue
+        return JSONResponse(status_code=500, content={"message": "Error processing your request."})
