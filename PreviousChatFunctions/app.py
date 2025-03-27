@@ -20,31 +20,7 @@ templates = Jinja2Templates(directory="templates")
 
 # Mock Array to store chat data
 previousChat = [
-    {
-    "chatId": 1,
-    "chatName": "Chat",
-    "chatHistory": []
-  },
-  {
-    "chatId": 2,
-    "chatName": "Chat1",
-    "chatHistory": []
-  },
-  {
-    "chatId": 3,
-    "chatName": "Chat2",
-    "chatHistory": []
-  },
-  {
-    "chatId": 4,
-    "chatName": "Chat3",
-    "chatHistory": []
-  },
-  {
-    "chatId": 5,
-    "chatName": "Chat4",
-    "chatHistory": []
-  }
+    
 ]
 
 @app.get("/")

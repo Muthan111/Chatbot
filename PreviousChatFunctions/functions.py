@@ -21,12 +21,12 @@ def generateChatId(chatArray):
 
 # Function to generate a chat name
 def generateChatName(baseName, chatArray):
+    # If no chats exist yet, start with "Chat1"
+    if not chatArray:  # If the chat array is empty
+        return f"{baseName}1"
+    
     # Extract existing chat names from the provided array
     existingNames = [chat["chatName"] for chat in chatArray]
-    
-    # If the base name is not already in use, return it
-    if baseName not in existingNames:
-        return baseName
     
     # Append a number to make the name unique
     counter = 1

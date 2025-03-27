@@ -64,17 +64,21 @@
             color: white;
             cursor: pointer;
         }
+        .createNewChat {
+            padding: 10px;
+            background-color: #ffffff;
+            color: rgb(0, 0, 0);
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>Chats</h2>
         <ul class="chat-list" id="chatList">
-            <li onclick="selectChat('Chat1')">Chat1</li>
-            <li onclick="selectChat('Chat2')">Chat 2</li>
-            <li onclick="selectChat('Chat3')">Chat 3</li>
-            <li onclick="selectChat('Chat4')">Chat 4</li>
+            
         </ul>
+        <button class="createNewChat" onclick="createNewChat()">Create New Chat</button>
     </div>
     <div class="main-content">
         <div class="chat-box" id="chatBox">
@@ -90,7 +94,7 @@
     </div>
 
     <script>
-        let selectedChatName = "Chat1"; // Replace with the actual chat name if dynamic
+        let selectedChatName = null; // Replace with the actual chat name if dynamic
         async function selectChat(chatName) {
             // document.getElementById("chatBox").innerHTML = `<p><strong>${chatName}</strong></p>`;
             selectedChatName = chatName;
@@ -160,7 +164,11 @@
                 return;
             }
 
-            const chatName = selectedChatName;
+            // const chatName = selectedChatName;
+            // if(!chatName) {
+            //     alert("Please select a chat.");
+            //     return;
+            // }
             // Construct the URL with query parameters
             const url = `/interactWithChat?chatname=${encodeURIComponent(chatName)}&message=${encodeURIComponent(userInput)}`;
 
@@ -189,6 +197,8 @@
             console.error('Error:', error);
             document.getElementById("chatBox").innerHTML += `<p>Error interacting with chat</p>`;
         }
+
+        // Send message to the model
         async function displayChatHistory(chatName){
             selectedChatName = chatName;
             try {
@@ -219,7 +229,31 @@
                 document.getElementById("chatBox").innerHTML = `<p>Error loading chat</p>`;
             }
         }
-    }
+        }
+        let chatCounter = 1
+        async function createNewChat() {
+            const chatName = `Chat${chatCounter}`;
+            chatCounter++; // Increment the counter for the next chat
+            
+            // Call the backend API
+            const response = await fetch(`/createChat`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create chat');
+            }
+
+            // Update the chat list
+            const chatList = document.getElementById("chatList");
+            const newChat = document.createElement("li");
+            newChat.textContent = chatName;
+            newChat.onclick = () => selectChat(chatName);
+            chatList.appendChild(newChat);
+        }
     </script>
 </body>
 </html>
