@@ -12,13 +12,10 @@ logging.basicConfig(level=logging.INFO)
 genai.configure(api_key="AIzaSyAwLLmx0KhQ-DDnXSajcJNEFuJp_7tR2OI")
 model = genai.GenerativeModel("gemini-2.0-flash")
 
-# Initialize FastAPI app
 app = FastAPI()
-
-# Set up Jinja2Templates
 templates = Jinja2Templates(directory="templates")
 
-# Mock Array to store chat data
+# Array to store chat data
 previousChat = []
 
 @app.get("/")
@@ -51,24 +48,16 @@ async def async_generate_content(userinput):
 @app.get("/interactWithChat")
 async def read_interactWithChat(chatname: str, message: str):
     logging.info(f"Interacting with chat: {chatname}, message: {message}")
-    
     if not previousChat:
         raise HTTPException(status_code=400, detail="No chats available")
 
     chat = getChat(chatname, previousChat)
     if not chat:
         raise HTTPException(status_code=404, detail="Chat not found")
-
-    # Generate response asynchronously
     response_text = interactWithChat(chatname, message, previousChat)
 
     if not response_text:
         raise HTTPException(status_code=500, detail="Failed to generate a response")
-
-    # Store chat history properly
-    chat["chatHistory"].append({"role": "user", "message": message})
-    chat["chatHistory"].append({"role": "bot", "message": response_text})
-
     return {"userMessage": message, "botResponse": response_text}
 
 @app.get("/Allchat")
