@@ -3,134 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatBot</title>
+    <title>Chat Interface</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             display: flex;
-            height: 100vh;
             margin: 0;
             font-family: Arial, sans-serif;
-            background-color: #fff9fb;
-            color: #333;
         }
-
-        /* Sidebar Styles */
         .sidebar {
             width: 250px;
-            background-color: #4a90e2;
+            background-color: #56c05b;
+            color: rgb(0, 0, 0);
             padding: 20px;
-            overflow-y: auto;
             height: 100vh;
-            color: white;
         }
-
-        .chat-history {
-            list-style-type: none;
+        .sidebar h2 {
+            margin-bottom: 20px;
+        }
+        .chat-list {
+            list-style: none;
             padding: 0;
-            margin: 0;
         }
-
-        .chat-history li {
+        .chat-list li {
             padding: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            word-wrap: break-word;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
         }
-
-        .user-message { font-weight: bold; }
-        .bot-message { color: #ffeb99; }
-
-        /* Chat Container */
-        .chat-container {
+        .chat-list li:hover {
+            background-color: #333;
+        }
+        .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
         }
-
-        form {
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .input-box {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        input[type="text"] {
             padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 300px;
-            margin-bottom: 20px;
+            background-color: white;
+            border-top: 1px solid #ddd;
         }
-
-        button {
-            background-color: #93c5ff;
-            color: rgb(13, 8, 8);
+        .input-box input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            outline: none;
+        }
+        .input-box button {
             padding: 10px 20px;
             border: none;
-            border-radius: 5px;
+            background-color: #12970e68;
+            color: white;
             cursor: pointer;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background-color: #357ab7;
         }
     </style>
-    <script>
-        async function sendMessage(event) {
-            event.preventDefault();
-            let userInput = document.getElementById("user_input").value;
-            if (!userInput) return;
-
-            // Send message to FastAPI server
-            let response = await fetch("/chat", {
-                method: "POST",
-                body: new URLSearchParams({ user_input: userInput }),
-                headers: { "Content-Type": "application/x-www-form-urlencoded" }
-            });
-
-            let data = await response.json();
-
-            // Update chat history
-            let chatHistory = document.querySelector(".chat-history");
-            chatHistory.innerHTML = "";
-
-            data.chat_history.forEach(chat => {
-                let messageElement = document.createElement("li");
-                messageElement.className = chat.role === "user" ? "user-message" : "bot-message";
-                messageElement.textContent = chat.message;
-                chatHistory.appendChild(messageElement);
-            });
-
-            document.getElementById("user_input").value = "";
-        }
-    </script>
 </head>
 <body>
-    <!-- Sidebar for chat history -->
     <div class="sidebar">
-        <h2>Chat History</h2>
-        <ul class="chat-history">
-            {% for chat in chat_history %}
-                <li class="{{ 'user-message' if chat.role == 'user' else 'bot-message' }}">
-                    {{ chat.message }}
-                </li>
-            {% endfor %}
+        <h2>Chats</h2>
+        <ul class="chat-list" id="chatList">
+            <li onclick="selectChat('Chat1')">Chat1</li>
+            <li onclick="selectChat('Chat2')">Chat 2</li>
+            <li onclick="selectChat('Chat3')">Chat 3</li>
+            <li onclick="selectChat('Chat4')">Chat 4</li>
         </ul>
     </div>
-
-    <!-- Chat Form -->
-    <div class="chat-container">
-        <h1>ChatBot</h1>
-        <form onsubmit="sendMessage(event)">
-            <label for="user_input">Enter your input:</label>
-            <input type="text" id="user_input" name="user_input" placeholder="Type your message here..." required>
-            <button type="submit">Submit</button>
-        </form>
+    <div class="main-content">
+        <div class="chat-box" id="chatBox">
+            <p>Select a chat to start...</p>
+        </div>
+        <div class="input-box">
+            <input type="text" id="userInput" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
     </div>
+
+    <script>
+        async function selectChat(chatName) {
+            // document.getElementById("chatBox").innerHTML = `<p><strong>${chatName}</strong></p>`;
+            try {
+            // Call the backend API
+            const response = await fetch(`/getChat?chatname=${encodeURIComponent(chatName)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch chat data');
+            }
+
+            const data = await response.json();
+
+            // Update the chat box with the response
+            document.getElementById("chatBox").innerHTML = `<p><strong>${chatName}</strong></p>`;
+            if (data.messages) {
+                data.messages.forEach(message => {
+                    document.getElementById("chatBox").innerHTML += `<p>${message}</p>`;
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById("chatBox").innerHTML = `<p>Error loading chat</p>`;
+        }
+        }
+        // function sendMessage() {
+        //     const userInput = document.getElementById("userInput").value;
+        //     if (!userInput) return;
+            
+        //     const chatBox = document.getElementById("chatBox");
+        //     const userMessage = `<p><strong>You:</strong> ${userInput}</p>`;
+        //     chatBox.innerHTML += userMessage;
+        //     document.getElementById("userInput").value = "";
+        // }
+        async function sendMessage() {
+        try {
+            const chatName = "Chat1"; // Replace with the actual chat name if dynamic
+            const userInput = document.getElementById("userInput").value;
+
+            if (!userInput) {
+                alert("Please enter a message.");
+                return;
+            }
+
+            // Construct the URL with query parameters
+            const url = `/interactWithChat?chatname=${encodeURIComponent(chatName)}&message=${encodeURIComponent(userInput)}`;
+
+            // Call the backend API
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to interact with chat');
+            }
+
+            const data = await response.json();
+
+            // Update the chat box with the response
+            const chatBox = document.getElementById("chatBox");
+            chatBox.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
+            chatBox.innerHTML += `<p><strong>Bot:</strong> ${data.botResponse}</p>`;
+
+            // Clear the input field
+            document.getElementById("userInput").value = "";
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById("chatBox").innerHTML += `<p>Error interacting with chat</p>`;
+        }
+    }
+    </script>
 </body>
 </html>
