@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot</title>
+</head>
+<body>
+    <h2>Chatbot</h2>
+    <div id="chat-box">
+        {% for chat in chat_history %}
+            <p><strong>{{ chat.role }}:</strong> {{ chat.message }}</p>
+        {% endfor %}
+    </div>
+    <form id="chat-form" method="POST">
+        <input type="text" name="user_input" required>
+        <button type="submit">Send</button>
+    </form>
+</body>
+</html>

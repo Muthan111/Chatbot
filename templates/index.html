@@ -17,6 +17,8 @@
             color: rgb(0, 0, 0);
             padding: 20px;
             height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         .sidebar h2 {
             margin-bottom: 20px;
@@ -24,6 +26,9 @@
         .chat-list {
             list-style: none;
             padding: 0;
+            flex-grow:1;
+            overflow-y: auto;
+            max-height: calc(100vh - 80px);
         }
         .chat-list li {
             padding: 10px;
@@ -69,6 +74,8 @@
             background-color: #ffffff;
             color: rgb(0, 0, 0);
             cursor: pointer;
+            border: none;
+            text-align: center;
         }
     </style>
 </head>
