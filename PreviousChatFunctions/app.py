@@ -9,8 +9,8 @@ from PreviousChatFunctions.functions import createChat, getChat, interactWithCha
 logging.basicConfig(level=logging.INFO)
 
 # Configure Gemini API
-genai.configure(api_key="AIzaSyA01sZiEjsor-Dt1ehxhr-LfIe5AijhNLA")
-model = genai.GenerativeModel("gemini-2.0-pro-exp")
+genai.configure(api_key="AIzaSyAwLLmx0KhQ-DDnXSajcJNEFuJp_7tR2OI")
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -19,9 +19,7 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 # Mock Array to store chat data
-previousChat = [
-    
-]
+previousChat = []
 
 @app.get("/")
 async def read_root(request: Request):
@@ -62,7 +60,10 @@ async def read_interactWithChat(chatname: str, message: str):
         raise HTTPException(status_code=404, detail="Chat not found")
 
     # Generate response asynchronously
-    response_text = await async_generate_content(message)
+    response_text = interactWithChat(chatname, message, previousChat)
+
+    if not response_text:
+        raise HTTPException(status_code=500, detail="Failed to generate a response")
 
     # Store chat history properly
     chat["chatHistory"].append({"role": "user", "message": message})

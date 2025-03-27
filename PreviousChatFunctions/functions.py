@@ -81,17 +81,27 @@ def getAllChats(chatArray):
 def interactWithChat(chatname,userinput,chatarray):
     for chat in chatarray:
         if chat["chatName"] == chatname:
+            # Gather the chat history as context
             history = chat["chatHistory"]
-            addinput = userinput
-            response = model.generate_content(addinput)
-            history.append({"role": "user", "message": addinput})
-            history.append({"role": "bot", "message": response.text})
+            context = "\n".join([f"{item['role']}: {item['message']}" for item in history])
+            
+            # Combine the context with the user's input
+            prompt = f"Context:\n{context}\n\nUser: {userinput}\nBot:"
+            
+            # Generate the bot's response using the model
+            response = model.generate_content(prompt)
+            bot_response = response.text
+            
+            # Update the chat history
+            history.append({"role": "user", "message": userinput})
+            history.append({"role": "bot", "message": bot_response})
+            
             # Print only the bot's responses
             bot_responses = [item["message"] for item in history if item["role"] == "bot"]
             for bot_response in bot_responses:
                 print(bot_response)
             
-            return response.text # Exit the loop once the chat is found
+            return bot_response  # Return the bot's response
     return None
 
 def deleteChat(chatname):
