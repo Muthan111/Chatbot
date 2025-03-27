@@ -1,65 +1,93 @@
-from fastapi import FastAPI, Request, Form, Depends
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 import google.generativeai as genai
-from functions import createChat, getChat, interactWithChat,getAllChats,editUserMessage
-genai.configure(api_key="AIzaSyDSbw52Qq4EjJ_nBoQvEUst3IXZwlhAOE8")
+import asyncio
+import logging
+from PreviousChatFunctions.functions import createChat, getChat, interactWithChat, getAllChats, editUserMessage
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
+# Configure Gemini API
+genai.configure(api_key="AIzaSyA01sZiEjsor-Dt1ehxhr-LfIe5AijhNLA")
 model = genai.GenerativeModel("gemini-2.0-pro-exp")
-# Mock Array to store chat data
-# If have time  implement postgresql
-previousChat = [
-    #chatId
-    #chatName
-    #chatHistory : []
-   
-]
+
+# Initialize FastAPI app
 app = FastAPI()
 
+# Set up Jinja2Templates
+templates = Jinja2Templates(directory="templates")
+
+# Mock Array to store chat data
+previousChat = []
+
 @app.get("/")
-def read_root(request: Request):
-    return {"Hello": "World"}
+async def read_root(request: Request):
+    logging.info("Accessing root endpoint")
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/createChat")
-def read_createChat(request: Request):
+async def read_createChat():
+    logging.info("Creating new chat")
+    global previousChat
     chat = createChat(previousChat)
     if not chat:
-        return {"error": "Chat creation failed"}
-    return {"chatId": chat["chatId"], "chatName": chat["chatName"], "chatHistory": chat["chatHistory"]}
-
-@app.get("/getChat")
-def read_getChat(request: Request, chatname: str):
-    chat = getChat(chatname, previousChat)
-    if not previousChat:
-        return {"error": "Array does not exist"}
-    if not chat:
-        return {"error": "Chat not found"}
+        raise HTTPException(status_code=500, detail="Chat creation failed")
     return chat
+
+async def async_generate_content(userinput):
+    """Runs Gemini API call asynchronously to prevent blocking."""
+    loop = asyncio.get_running_loop()
+    try:
+        response = await loop.run_in_executor(None, model.generate_content, userinput)
+        if response and hasattr(response, "text"):
+            return response.text
+        else:
+            return "Error: No response from AI"
+    except Exception as e:
+        logging.error(f"Error in AI generation: {str(e)}")
+        return "Error: AI failed to respond"
 
 @app.get("/interactWithChat")
-def read_interactWithChat(request: Request, chatname: str, message: str):
-    chat = interactWithChat(chatname, message, previousChat)
+async def read_interactWithChat(chatname: str, message: str):
+    logging.info(f"Interacting with chat: {chatname}, message: {message}")
+    
     if not previousChat:
-        return {"error": "Array does not exist"}
+        raise HTTPException(status_code=400, detail="No chats available")
+
+    chat = getChat(chatname, previousChat)
     if not chat:
-        return {"error": "Chat not found"}
-    return chat
+        raise HTTPException(status_code=404, detail="Chat not found")
+
+    # Generate response asynchronously
+    response_text = await async_generate_content(message)
+
+    # Store chat history properly
+    chat["chatHistory"].append({"role": "user", "message": message})
+    chat["chatHistory"].append({"role": "bot", "message": response_text})
+
+    return {"userMessage": message, "botResponse": response_text}
 
 @app.get("/Allchat")
-def read_Allchat(request: Request):
+async def read_Allchat():
+    logging.info("Fetching all chats")
     chat = getAllChats(previousChat)
+    if not chat:
+        raise HTTPException(status_code=404, detail="No chats found")
     return chat
 
 @app.put("/editMessage")
-def edit_message(request: Request, chatname: str, message_index: int, new_message: str):
-    """
-    Endpoint to edit a user message in the chat history of a specific chat.
-
-    Args:
-        chatname (str): The name of the chat to edit.
-        message_index (int): The index of the message to edit.
-        new_message (str): The new content for the message.
-
-    Returns:
-        dict: The updated chat object if successful, or an error message.
-    """
+async def edit_message(chatname: str, message_index: int, new_message: str):
+    logging.info(f"Editing message in chat: {chatname} at index {message_index}")
     result = editUserMessage(chatname, message_index, new_message, previousChat)
+    if not result:
+        raise HTTPException(status_code=404, detail="Chat or message not found")
     return result
+
+@app.get("/getChat")
+async def getChatv1(chatname: str):
+    logging.info(f"Fetching chat: {chatname}")
+    chat = getChat(chatname, previousChat)
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    return chat
