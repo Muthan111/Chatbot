@@ -1,13 +1,11 @@
 import array
 import google.generativeai as genai
 
-genai.configure(api_key="AIzaSyDSbw52Qq4EjJ_nBoQvEUst3IXZwlhAOE8")
+genai.configure(api_key="AIzaSyDPrXjET21ihfNpd6ZiPLNOS1GpwP1FWNw")
 model = genai.GenerativeModel("gemini-2.0-pro-exp")
 
 previousChat = [
-    #chatId
-    #chatName
-    #chatHistory : []
+    
 ]
 # Function to generate a unique chat ID
 def generateChatId(chatArray):
@@ -63,9 +61,18 @@ def createChat(array1):
     return chat
 
 def getChat(chatname, chatArray):
+    
     for chat in chatArray:
         if chat["chatName"] == chatname:  # Ensure exact match
             return chat
+        
+    return None
+
+def getChatHistory(chatname, chatArray):
+    for chat in chatArray:
+        if chat["chatName"] == chatname:
+            return 
+                
     return None
 
 def getAllChats(chatArray):

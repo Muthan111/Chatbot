@@ -19,7 +19,33 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 # Mock Array to store chat data
-previousChat = []
+previousChat = [
+    {
+    "chatId": 1,
+    "chatName": "Chat",
+    "chatHistory": []
+  },
+  {
+    "chatId": 2,
+    "chatName": "Chat1",
+    "chatHistory": []
+  },
+  {
+    "chatId": 3,
+    "chatName": "Chat2",
+    "chatHistory": []
+  },
+  {
+    "chatId": 4,
+    "chatName": "Chat3",
+    "chatHistory": []
+  },
+  {
+    "chatId": 5,
+    "chatName": "Chat4",
+    "chatHistory": []
+  }
+]
 
 @app.get("/")
 async def read_root(request: Request):
@@ -91,3 +117,11 @@ async def getChatv1(chatname: str):
     if not chat:
         raise HTTPException(status_code=404, detail="Chat not found")
     return chat
+
+@app.get("/getChatHistory")
+async def getChatHistory(chatname: str):
+    logging.info(f"Fetching chat history for: {chatname}")
+    chat = getChat(chatname, previousChat)
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    return chat["chatHistory"]
