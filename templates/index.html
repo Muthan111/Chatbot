@@ -192,7 +192,6 @@
         //     chatBox.innerHTML += userMessage;
         //     document.getElementById("userInput").value = "";
         // }
-        let chatCounter = 1
         async function sendMessage() {
             try {
                 const userInput = document.getElementById("userInput").value;
@@ -214,14 +213,10 @@
                     }
                     
                     const newChat = await createChatResponse.json();
-                    selectedChatName = newChat.chatName; // Assuming the response contains a `chatName` field
-
-                    // Update the chat list with the new chat
-                    const chatList = document.getElementById("chatList");
-                    const newChatElement = document.createElement("li");
-                    newChatElement.textContent = selectedChatName;
-                    newChatElement.onclick = () => selectChat(selectedChatName);
-                    chatList.appendChild(newChatElement);
+                    selectedChatName = newChat.chatName; 
+                    
+                    // Ensure chat is added to the sidebar
+                    addChatToSidebar(selectedChatName);
                 }
 
                 // Construct the URL with query parameters
@@ -294,9 +289,10 @@
                 document.getElementById("chatBox").innerHTML = `<p>Error loading chat</p>`;
             }
         }
-        
+        let chatCounter = 1
         async function createNewChat() {
-            
+            const chatName = `Chat${chatCounter}`;
+            chatCounter++; // Increment the counter for the next chat
             
             // Call the backend API
             const response = await fetch(`/createChat`, {
@@ -309,38 +305,13 @@
             if (!response.ok) {
                 throw new Error('Failed to create chat');
             }
-            const chatName = `Chat${chatCounter}`
-             // Increment the counter for the next chat
+
             // Update the chat list
             const chatList = document.getElementById("chatList");
-            const existingChats = Array.from(chatList.children).map(chat => chat.textContent);
-            if (existingChats.includes(chatName)) {
-                chatCounter++; // Increment the counter again if the chat name already exists
-                // chatName = `Chat${chatCounter}`;
-                console.log(chatName);
-                console.log(chatCounter);
-                console.log("for if statement");
-
-                // Update the chat list
-                const newChat = document.createElement("li");
-                newChat.textContent = chatName;
-                newChat.onclick = () => selectChat(chatName);
-                chatList.appendChild(newChat);
-            }
-            else {
-                const chatName = `Chat${chatCounter}`;
-                
-                console.log(chatName);
-                console.log(chatCounter);
-                console.log("for else statement");
-                chatCounter++
-                const newChat = document.createElement("li");
-                newChat.textContent = chatName;
-                newChat.onclick = () => selectChat(chatName);
-                chatList.appendChild(newChat);
-            }
-
-            
+            const newChat = document.createElement("li");
+            newChat.textContent = chatName;
+            newChat.onclick = () => selectChat(chatName);
+            chatList.appendChild(newChat);
         }
     </script>
 </body>
