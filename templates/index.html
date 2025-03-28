@@ -205,7 +205,7 @@
                         method: 'GET',
                         headers: { 'Content-Type': 'application/json' },
                     });
-                    
+                    chatCounter++;
                     if (!createChatResponse.ok) {
                         throw new Error('Failed to create a new chat');
                     }
@@ -238,7 +238,7 @@
                 const chatBox = document.getElementById("chatBox");
                 chatBox.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
                 chatBox.innerHTML += `<p><strong>Bot:</strong> ${data.botResponse}</p>`;
-                chatCounter++;
+                
                 // Clear the input field
                 document.getElementById("userInput").value = "";
             } catch (error) {

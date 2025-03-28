@@ -1,8 +1,9 @@
 import array
 import google.generativeai as genai
 
-genai.configure(api_key="AIzaSyDPrXjET21ihfNpd6ZiPLNOS1GpwP1FWNw")
-model = genai.GenerativeModel("gemini-2.0-pro-exp")
+# Configure Gemini API
+genai.configure(api_key="AIzaSyDlbkC3NkraCEyKAt2oGiWBhdHey4xQIXc")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 previousChat = []
 
