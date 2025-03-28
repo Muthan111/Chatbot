@@ -3,14 +3,14 @@ from fastapi.templating import Jinja2Templates
 import google.generativeai as genai
 import asyncio
 import logging
-from PreviousChatFunctions.functions import createChat, getChat, interactWithChat, getAllChats, editUserMessage
+from functions import createChat, getChat, interactWithChat, getAllChats, editUserMessage
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
 # Configure Gemini API
 genai.configure(api_key="AIzaSyAwLLmx0KhQ-DDnXSajcJNEFuJp_7tR2OI")
-model = genai.GenerativeModel("gemini-2.0-flash")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
