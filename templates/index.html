@@ -192,6 +192,7 @@
         //     chatBox.innerHTML += userMessage;
         //     document.getElementById("userInput").value = "";
         // }
+        let chatCounter = 1
         async function sendMessage() {
             try {
                 const userInput = document.getElementById("userInput").value;
@@ -240,7 +241,7 @@
                 const chatBox = document.getElementById("chatBox");
                 chatBox.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
                 chatBox.innerHTML += `<p><strong>Bot:</strong> ${data.botResponse}</p>`;
-
+                chatCounter++;
                 // Clear the input field
                 document.getElementById("userInput").value = "";
             } catch (error) {
@@ -289,7 +290,7 @@
                 document.getElementById("chatBox").innerHTML = `<p>Error loading chat</p>`;
             }
         }
-        let chatCounter = 1
+        
         async function createNewChat() {
             const chatName = `Chat${chatCounter}`;
             chatCounter++; // Increment the counter for the next chat

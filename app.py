@@ -9,7 +9,7 @@ from functions import createChat, getChat, interactWithChat, getAllChats, editUs
 logging.basicConfig(level=logging.INFO)
 
 # Configure Gemini API
-genai.configure(api_key="AIzaSyAwLLmx0KhQ-DDnXSajcJNEFuJp_7tR2OI")
+genai.configure(api_key="AIzaSyDK_uzl6p2bmTUSzPNAB27eE84XeFHXD9M")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 app = FastAPI()
