@@ -107,55 +107,82 @@
     <script>
         let selectedChatName = null; // Replace with the actual chat name if dynamic
         async function selectChat(chatName) {
-            // document.getElementById("chatBox").innerHTML = `<p><strong>${chatName}</strong></p>`;
             selectedChatName = chatName;
             
             try {
-            // Call the backend API
-            const response = await fetch(`/getChat?chatname=${encodeURIComponent(chatName)}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            const chatHistory = await fetch(`/getChatHistory?chatname=${encodeURIComponent(chatName)}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch chat data');
+                const response = await fetch(`/getChatHistory?chatname=${encodeURIComponent(chatName)}`);
+                if (!response.ok) throw new Error('Failed to fetch chat history');
+                
+                const data = await response.json();
+                document.getElementById("chatBox").innerHTML = `<p><strong>${chatName}</strong></p>`;
+                
+                if (Array.isArray(data)) {
+                    data.forEach(message => {
+                        document.getElementById("chatBox").innerHTML += 
+                        `<p><strong>${message.role}:</strong> ${message.message}</p>`;
+                    });
+                
+                } else {
+                    document.getElementById("chatBox").innerHTML = "<p>No chat history available.</p>";
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById("chatBox").innerHTML = `<p>Error loading chat</p>`;
             }
+        }
 
-            const data = await response.json();
-            const chatHistoryData = await chatHistory.json();
-            console.log(chatHistoryData);
+        // async function selectChat(chatName) {
+        //     // document.getElementById("chatBox").innerHTML = `<p><strong>${chatName}</strong></p>`;
+        //     selectedChatName = chatName;
+            
+        //     try {
+        //     // Call the backend API
+        //     const response = await fetch(`/getChat?chatname=${encodeURIComponent(chatName)}`, {
+        //         method: 'GET',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //     });
+        //     const chatHistory = await fetch(`/getChatHistory?chatname=${encodeURIComponent(chatName)}`, {
+        //         method: 'GET',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //     });
 
-            // Update the chat box with the response
-            document.getElementById("chatBox").innerHTML = `<p><strong>${chatName}</strong></p>`;
-            if (data.messages) {
-                data.messages.forEach(message => {
-                    document.getElementById("chatBox").innerHTML += `<p>${message}</p>`;
-                });
-            }
-            const historyElement = document.getElementById("history");
-            historyElement.innerHTML = "";
-            if (Array.isArray(chatHistoryData)) {
-            chatHistoryData.forEach(message => {
-                const formattedMessage = `<p><strong>${message.role}:</strong> ${message.message}</p>`;
-                historyElement.innerHTML += formattedMessage;
-            });
-        }
-            else {
-                historyElement.innerHTML = "<p>No chat history available.</p>";
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            document.getElementById("chatBox").innerHTML = `<p>Error loading chat</p>`;
-        }
-        }
+        //     if (!response.ok) {
+        //         throw new Error('Failed to fetch chat data');
+        //     }
+
+        //     const data = await response.json();
+        //     const chatHistoryData = await chatHistory.json();
+        //     console.log(chatHistoryData);
+
+        //     // Update the chat box with the response
+        //     document.getElementById("chatBox").innerHTML = `<p><strong>${chatName}</strong></p>`;
+        //     if (data.messages) {
+        //         data.messages.forEach(message => {
+        //             document.getElementById("chatBox").innerHTML += `<p>${message}</p>`;
+        //         });
+        //     }
+        //     const historyElement = document.getElementById("history");
+        //     historyElement.innerHTML = "";
+        //     if (Array.isArray(chatHistoryData)) {
+        //     chatHistoryData.forEach(message => {
+        //         const formattedMessage = `<p><strong>${message.role}:</strong> ${message.message}</p>`;
+        //         historyElement.innerHTML += formattedMessage;
+        //     });
+        // }
+        //     else {
+        //         historyElement.innerHTML = "<p>No chat history available.</p>";
+        //     }
+        // } catch (error) {
+        //     console.error('Error:', error);
+        //     document.getElementById("chatBox").innerHTML = `<p>Error loading chat</p>`;
+        // }
+        // }
+
+
         // function sendMessage() {
         //     const userInput = document.getElementById("userInput").value;
         //     if (!userInput) return;
@@ -176,27 +203,20 @@
 
                 // Check if a chat is selected
                 if (!selectedChatName) {
-                    // If no chat is selected, create a new chat
                     const createChatResponse = await fetch(`/createChat`, {
                         method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                     });
-
+                    
                     if (!createChatResponse.ok) {
                         throw new Error('Failed to create a new chat');
                     }
-
+                    
                     const newChat = await createChatResponse.json();
-                    selectedChatName = newChat.chatName; // Assuming the response contains a `chatName` field
-
-                    // Update the chat list with the new chat
-                    const chatList = document.getElementById("chatList");
-                    const newChatElement = document.createElement("li");
-                    newChatElement.textContent = selectedChatName;
-                    newChatElement.onclick = () => selectChat(selectedChatName);
-                    chatList.appendChild(newChatElement);
+                    selectedChatName = newChat.chatName; 
+                    
+                    // Ensure chat is added to the sidebar
+                    addChatToSidebar(selectedChatName);
                 }
 
                 // Construct the URL with query parameters
@@ -228,6 +248,15 @@
                 document.getElementById("chatBox").innerHTML += `<p>Error interacting with chat</p>`;
             }
         }
+
+        function addChatToSidebar(chatName) {
+            const chatList = document.getElementById("chatList");
+            const newChatElement = document.createElement("li");
+            newChatElement.textContent = chatName;
+            newChatElement.onclick = () => selectChat(chatName);
+            chatList.appendChild(newChatElement);
+        }
+
 
         // Send message to the model
         async function displayChatHistory(chatName){
