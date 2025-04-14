@@ -1,8 +1,14 @@
 import array
 import google.generativeai as genai
-
-# Configure Gemini API
-genai.configure(api_key="AIzaSyDlbkC3NkraCEyKAt2oGiWBhdHey4xQIXc")
+from dotenv import load_dotenv
+import os
+# Load environment variables
+load_dotenv()
+# API Key Configuration
+api_key = os.getenv("API_KEY")
+if not api_key:
+    raise ValueError("API_KEY is not set in the .env file")
+genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 previousChat = []

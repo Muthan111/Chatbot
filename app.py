@@ -32,18 +32,7 @@ async def read_createChat():
         raise HTTPException(status_code=500, detail="Chat creation failed")
     return chat
 
-# async def async_generate_content(userinput):
-#     """Runs Gemini API call asynchronously to prevent blocking."""
-#     loop = asyncio.get_running_loop()
-#     try:
-#         response = await loop.run_in_executor(None, model.generate_content, userinput)
-#         if response and hasattr(response, "text"):
-#             return response.text
-#         else:
-#             return "Error: No response from AI"
-#     except Exception as e:
-#         logging.error(f"Error in AI generation: {str(e)}")
-#         return "Error: AI failed to respond"
+
 
 @app.get("/interactWithChat")
 async def read_interactWithChat(chatname: str, message: str):
