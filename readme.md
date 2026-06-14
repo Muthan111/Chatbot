@@ -1,4 +1,4 @@
-# ChatbotAsssignment
+# Chatbot
 
 This project is a chatbot application built using **FastAPI** and **Google Generative AI**. It allows users to interact with a chatbot powered by Google's generative AI model, with session-based chat history and a web interface.
 
