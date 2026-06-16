@@ -21,5 +21,22 @@ Before running the project, ensure you have the following installed:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Muthan111/ChatbotAsssignment.git
+   git clone https://github.com/Muthan111/Chatbot.git
    cd ChatbotAssignment
+   ```
+2. ```bash
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+3. Install required packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Create .env file
+   API_KEY=
+
+5. Run the application:
+   ```bash
+   uvicorn main:app --reload
+
+   ```
