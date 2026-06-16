@@ -9,7 +9,7 @@ api_key = os.getenv("API_KEY")
 if not api_key:
     raise ValueError("API_KEY is not set in the .env file")
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 previousChat = []
 
